@@ -7,13 +7,13 @@ namespace Ajedrez.GameObjects
     using PieceInit = Tuple<int, int, ColorFicha, TipoPieza>;
     public enum Output
     {
-        Success,Check,SelfCheck,
+        Success,Check,OutOfBounds,InvalidMove,SelfCheck,CancelledMove,
         NotYourTurn,
         CheckMate,
         StaleMate
     }
 
-    public enum Direccion
+    enum Direccion
     {
         Up,Down,Left,Right,RightUp,LeftUp,RightDown,LeftDown    
     }
@@ -43,6 +43,8 @@ namespace Ajedrez.GameObjects
             public Dictionary<int, string> ColumnaLetraDictionary{get { return _columnaLetraDictionary; }}
             public Dictionary<int, string> PiezasDictionary{get { return _piezasDictionary; }}
             
+            private const int MaxCasillas = 64;
+            private const int MaxFichas = 24;
             private const int MaxFilas = 8;
             private const int MaxColumnas = 8;
             private int _piezaContador;
@@ -101,7 +103,7 @@ namespace Ajedrez.GameObjects
                 }
             }
 
-            private static Casilla NewCasilla(ColorCasilla color, int columna, int fila)
+            private Casilla NewCasilla(ColorCasilla color, int columna, int fila)
             {
                 return new Casilla
                 {
@@ -121,11 +123,16 @@ namespace Ajedrez.GameObjects
             }
 
             private  Pieza CrearPieza(TipoPieza tipo,ColorFicha color)
-            {   
-                var newPiece = PieceFactory.MakePiece(tipo, color, _piezaContador++);
+            {   var newPiece =  new Pieza
+                {
+                    Color = color,
+                    Id = _piezaContador++,
+                    Tipo = (int)tipo
+                };
                 _piezas.Add(newPiece);
                 return newPiece;
             }
+
             
             public Casilla GetCasilla(int fila, int columna)
             {
@@ -155,51 +162,51 @@ namespace Ajedrez.GameObjects
 
             private List<Casilla> MovimientoPieza(Casilla casilla)
             {
-                return casilla.PiezaContenida.GetMovementRange(casilla, _casillas);
-                var output = new List<Casilla>();
+                var king = GetKing(casilla.PiezaContenida.Color);
+                var returnList = new List<Casilla>();
                 switch ((TipoPieza)casilla.PiezaContenida.Tipo)
                 {
                     case TipoPieza.Peon:
-                        output.AddRange(PeonRangeCheck(casilla));
+                        returnList.AddRange(PeonRangeCheck(casilla));
                         break;
                     case TipoPieza.Torre:
-                        output.AddRange(RangeCheck(casilla,casilla,Direccion.Up));
-                        output.AddRange(RangeCheck(casilla,casilla,Direccion.Down));
-                        output.AddRange(RangeCheck(casilla,casilla,Direccion.Left));
-                        output.AddRange(RangeCheck(casilla,casilla,Direccion.Right));
+                        returnList.AddRange(RangeCheck(casilla,casilla,Direccion.Up));
+                        returnList.AddRange(RangeCheck(casilla,casilla,Direccion.Down));
+                        returnList.AddRange(RangeCheck(casilla,casilla,Direccion.Left));
+                        returnList.AddRange(RangeCheck(casilla,casilla,Direccion.Right));
                         break;
                     case TipoPieza.Caballero:
-                        output.AddRange(CaballeroRangeCheck(casilla));
+                        returnList.AddRange(CaballeroRangeCheck(casilla));
                         break;
                     case TipoPieza.Alfil:
-                        output.AddRange(RangeCheck(casilla, casilla, Direccion.LeftUp));
-                        output.AddRange(RangeCheck(casilla, casilla, Direccion.LeftDown));
-                        output.AddRange(RangeCheck(casilla, casilla, Direccion.RightDown));
-                        output.AddRange(RangeCheck(casilla, casilla, Direccion.RightUp));
+                        returnList.AddRange(RangeCheck(casilla, casilla, Direccion.LeftUp));
+                        returnList.AddRange(RangeCheck(casilla, casilla, Direccion.LeftDown));
+                        returnList.AddRange(RangeCheck(casilla, casilla, Direccion.RightDown));
+                        returnList.AddRange(RangeCheck(casilla, casilla, Direccion.RightUp));
                         break;
                     case TipoPieza.Reina:
-                        output.AddRange(RangeCheck(casilla, casilla, Direccion.Up));
-                        output.AddRange(RangeCheck(casilla, casilla, Direccion.RightUp));
-                        output.AddRange(RangeCheck(casilla, casilla, Direccion.Right));
-                        output.AddRange(RangeCheck(casilla, casilla, Direccion.RightDown));
-                        output.AddRange(RangeCheck(casilla, casilla, Direccion.Down));
-                        output.AddRange(RangeCheck(casilla, casilla, Direccion.LeftDown));
-                        output.AddRange(RangeCheck(casilla, casilla, Direccion.Left));
-                        output.AddRange(RangeCheck(casilla, casilla, Direccion.LeftUp));
+                        returnList.AddRange(RangeCheck(casilla, casilla, Direccion.Up));
+                        returnList.AddRange(RangeCheck(casilla, casilla, Direccion.RightUp));
+                        returnList.AddRange(RangeCheck(casilla, casilla, Direccion.Right));
+                        returnList.AddRange(RangeCheck(casilla, casilla, Direccion.RightDown));
+                        returnList.AddRange(RangeCheck(casilla, casilla, Direccion.Down));
+                        returnList.AddRange(RangeCheck(casilla, casilla, Direccion.LeftDown));
+                        returnList.AddRange(RangeCheck(casilla, casilla, Direccion.Left));
+                        returnList.AddRange(RangeCheck(casilla, casilla, Direccion.LeftUp));
                         break;
                     case TipoPieza.Rey:
-                        output.AddRange(RangeCheck(casilla, casilla, Direccion.Up,1));
-                        output.AddRange(RangeCheck(casilla, casilla, Direccion.RightUp,1));
-                        output.AddRange(RangeCheck(casilla, casilla, Direccion.Right,1));
-                        output.AddRange(RangeCheck(casilla, casilla, Direccion.RightDown,1));
-                        output.AddRange(RangeCheck(casilla, casilla, Direccion.Down,1));
-                        output.AddRange(RangeCheck(casilla, casilla, Direccion.LeftDown,1));
-                        output.AddRange(RangeCheck(casilla, casilla, Direccion.Left,1));
-                        output.AddRange(RangeCheck(casilla, casilla, Direccion.LeftUp,1));
+                        returnList.AddRange(RangeCheck(casilla, casilla, Direccion.Up,1));
+                        returnList.AddRange(RangeCheck(casilla, casilla, Direccion.RightUp,1));
+                        returnList.AddRange(RangeCheck(casilla, casilla, Direccion.Right,1));
+                        returnList.AddRange(RangeCheck(casilla, casilla, Direccion.RightDown,1));
+                        returnList.AddRange(RangeCheck(casilla, casilla, Direccion.Down,1));
+                        returnList.AddRange(RangeCheck(casilla, casilla, Direccion.LeftDown,1));
+                        returnList.AddRange(RangeCheck(casilla, casilla, Direccion.Left,1));
+                        returnList.AddRange(RangeCheck(casilla, casilla, Direccion.LeftUp,1));
                         //returnList.RemoveAll(casilla1 => CasillasEnPeligro(casilla,true).Contains(casilla1));
                         break;
                 }
-                return output;
+                return returnList;
             }
 
 

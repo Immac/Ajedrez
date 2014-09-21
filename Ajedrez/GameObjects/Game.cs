@@ -23,18 +23,50 @@ namespace Ajedrez.GameObjects
             _diccionarioColumnas = _tablero.ColumnaLetraDictionary;
         }
 
-        private static string ObtenerNombreCasilla()
+        private string ObtenerNombreCasilla(Casilla casilla)
         {
+            var fila = _diccionarioColumnas[casilla.Fila];
+
+            var id = fila + casilla.Columna;
+
+            var nombre = (casilla.Color == ColorCasilla.Negro) ? "N" : "B";
+
             return "___";
+            //return id + nombre;
         }
 
         private string ObtenerNombreFicha(Pieza pieza)
         {
             var id = pieza.Tipo;
             var diccionario = _tablero.PiezasDictionary;
-            var letraPieza = pieza.Abreviacion;
-            var color = (pieza.Color == ColorFicha.Negro) ? "N" : "B";
-            return "▲" + letraPieza + color;
+            var tipo = diccionario[id];
+            var prefijo = "";
+
+            switch (tipo)
+            {
+                case "Peon":
+                    prefijo = "P";
+                    break;
+                case "Torre":
+                    prefijo = "R";
+                    break;
+                case "Caballero":
+                    prefijo = "N";
+                    break;
+                case "Alfil":
+                    prefijo = "B";
+                    break;
+                case "Reina":
+                    prefijo = "Q";
+                    break;
+                case "Rey":
+                    prefijo = "K";
+                    break;
+            }
+
+            var nombre = (pieza.Color == ColorFicha.Negro) ? "N" : "B";
+
+            return "▲" + prefijo + nombre;
         }
 
         public void DibujarTableroConsola()
@@ -57,7 +89,7 @@ namespace Ajedrez.GameObjects
                     if (casilla.PiezaContenida != null)
                         pieza = casilla.PiezaContenida;
 
-                    var datoImprimir = ObtenerNombreCasilla();
+                    var datoImprimir = ObtenerNombreCasilla(casilla);
 
                     if (pieza != null)
                         datoImprimir = ObtenerNombreFicha(pieza);

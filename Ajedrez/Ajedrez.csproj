@@ -41,17 +41,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GameObjects\Alfil.cs" />
-    <Compile Include="GameObjects\Caballero.cs" />
     <Compile Include="GameObjects\Casilla.cs" />
     <Compile Include="GameObjects\Game.cs" />
-    <Compile Include="GameObjects\Peon.cs" />
-    <Compile Include="GameObjects\PieceFactory.cs" />
-    <Compile Include="GameObjects\Reina.cs" />
-    <Compile Include="GameObjects\Rey.cs" />
     <Compile Include="GameObjects\Tablero.cs" />
     <Compile Include="GameObjects\Pieza.cs" />
-    <Compile Include="GameObjects\Torre.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
